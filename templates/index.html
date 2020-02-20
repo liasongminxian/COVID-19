@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>全国疫情监控完整项目实战</title>
+    <script src="https://cdn.suoluomei.com/common/js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+    <script type="text/javascript" src="https://assets.pyecharts.org/assets/maps/china.js"></script>
+    <!-- import Vue before Element -->
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <!-- import JavaScript -->
+  <script src="//unpkg.com/element-ui@2.13.0/lib/index.js"></script>
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui@2.13.0/lib/theme-chalk/index.css">
+</head>
+<body>
+    <div id="map" style="width:1024px; height:600px;"></div>
+    <script>
+        $(
+            function () {
+                var chart = echarts.init(document.getElementById('map'), 'white', {renderer: 'canvas'});
+                $.ajax({
+                    type: "GET",
+                    url: "http://127.0.0.1:5000/mapChart",
+                    dataType: 'json',
+                    success: function (result) {
+                        chart.setOption(result);
+
+                    }
+                });
+            }
+        )
+    </script>
+
+    <div id="ConfNewLine" style="width:1024px; height:600px;"></div>
+    <script>
+        $(
+            function () {
+                var chart = echarts.init(document.getElementById('ConfNewLine'), 'white', {renderer: 'canvas'});
+                $.ajax({
+                    type: "GET",
+                    url: "http://127.0.0.1:5000/confChart",
+                    dataType: 'json',
+                    success: function (result) {
+                        chart.setOption(result);
+                    }
+                });
+            }
+        )
+    </script>
+
+
+      <div id="app">
+    <template>
+    <div>
+
+      <el-table
+        :data="tableData1"
+        style="width: 100%"
+        row-key="id"
+        border
+        lazy
+        :load="load"
+        :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+        <el-table-column
+          prop="province"
+          label="地区"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="newConfirm"
+          label="新增确诊"
+          width="180">
+        </el-table-column>
+          <el-table-column
+          prop="totalComfirm"
+          label="累计确诊"
+          width="180">
+        </el-table-column>
+          <el-table-column
+          prop="heal"
+          label="治愈"
+          width="180">
+        </el-table-column>
+        <el-table-column
+          prop="dead"
+          label="死亡">
+        </el-table-column>
+      </el-table>
+    </div>
+    </template>
+  </div>
+
+    </div>
+<script>
+        var Main = {
+        data() {
+          return {
+            tableData1: [{% for i in province %}
+            {
+              id: '{{ i[0] }}',
+              province: '{{ i[0] }}',
+              newConfirm: '{{ i[1] }}',
+              totalComfirm: '{{ i[2] }}',
+                heal: '{{ i[3] }}',
+                dead: '{{ i[4] }}',
+                children: [
+                    {% for c in city %}
+                        {% if c[0] == i[0] %}
+                            {
+
+                              id: '{{ c[0] }}{{ c[1] }}',
+                              province: '{{ c[1] }}',
+                              newConfirm: '{{ c[2] }}',
+                              totalComfirm: '{{ c[3] }}',
+                                heal: '{{ c[4] }}',
+                                dead: '{{ c[5] }}',
+
+                            },
+                        {% endif %}
+                    {% endfor %}
+                ]
+            },{% endfor %}  {
+              id: 3,
+              province: '2016-05-01',
+              newConfirm: '王小虎',
+              totalComfirm: '上海市普陀区金沙江路 1519 弄',
+              {#hasChildren: true,#}
+                children: [{
+
+                  id: 3-1,
+                  province: '2016-05-01',
+                  newConfirm: '王大虎',
+                  totalComfirm: '上海市普陀区金沙江路 1519 弄',
+
+
+                }]
+            }]
+          }
+        },
+        methods: {
+          load(tree, treeNode, resolve) {
+              console.log(tree.id);
+              var tree_id = tree.id;
+            setTimeout(() => {
+              resolve([{
+                  id: 32,
+                  province: '2016-05-01',
+                  newConfirm: '王小虎',
+                  totalComfirm: '上海市普陀区金沙江路 1519 弄',
+
+                }
+              ])
+            }, 1000)
+          }
+        },
+        }
+        var Ctor = Vue.extend(Main)
+        new Ctor().$mount('#app')
+    </script>
+
+
+
+</body>
+</html>
