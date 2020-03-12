@@ -26,6 +26,7 @@
                     success: function (result) {
                         chart.setOption(result);
 
+
                     }
                 });
             }
@@ -42,6 +43,31 @@
                     url: "http://127.0.0.1:5000/confChart",
                     dataType: 'json',
                     success: function (result) {
+                        var day_options = {
+           
+                            tooltip: {
+                                trigger: 'axis'
+                            },
+
+                            toolbox: {
+                                show: true,
+                                feature: {
+                                    dataZoom: {
+                                        yAxisIndex: 'none'
+                                    }, //区域缩放，区域缩放还原
+                                    dataView: { 
+                                        readOnly: false
+                                    }, //数据视图
+                                    magicType: {
+                                        type: ['line', 'bar', 'stack', 'tiled']
+                                    },  //切换为折线图，切换为柱状图
+                                    restore: {},  //还原
+                                    saveAsImage: {}   //保存为图片
+                                }
+                            },result
+
+                        };
+                        chart.setOption(day_options);
                         chart.setOption(result);
                     }
                 });
