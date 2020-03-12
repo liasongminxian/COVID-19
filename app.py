@@ -74,7 +74,7 @@ def conf_new_base() -> Line:
         .add_yaxis("累计确诊", comfirm_list, is_smooth=True)
         .add_yaxis("现有疑似", suspect_list, is_smooth=True)
         .set_global_opts(
-            title_opts=opts.TitleOpts(title="全国疫情新增确诊/疑似趋势图"),
+            title_opts=opts.TitleOpts(title="全国疫情累计确诊/疑似趋势图"),
             yaxis_opts=opts.AxisOpts(
                 type_="value",
                 axistick_opts=opts.AxisTickOpts(is_show=True),
@@ -110,6 +110,7 @@ def table_city():
 def get_data(path):
     """文件读取并格式化"""
     csv_path = 'F:/Python/疫情数据/' + datetime.datetime.now().strftime('%F') + '疫情数据/'
+    # csv_path = 'F:/Python/疫情数据/' + '2020-02-20' + '疫情数据/'
     dict_data = pd.read_csv(csv_path + path, encoding='GB2312')
     return dict_data
 
@@ -137,3 +138,4 @@ def get_conf_chart():
 # 主函数
 if __name__ == "__main__":
     app.run()
+

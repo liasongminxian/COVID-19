@@ -11,6 +11,7 @@ class COVID_19():
     def __init__(self):
         self.URL = 'https://view.inews.qq.com/g2/getOnsInfo?name=disease_h5'
 
+
         ua = UserAgent()
 
         # DNT = Do not track Request Header
@@ -47,7 +48,8 @@ class COVID_19():
 
         # 全球疫情数据(json数据里面的list)
         global_data = items['areaTree']
-        china_yesterday = items['chinaDayList'][-2]
+        # 数据口径关闭
+        # china_yesterday = items['chinaDayList'][-2]
         # print(china_yesterday)
         for country in global_data:
             country_data = []
@@ -61,11 +63,11 @@ class COVID_19():
             country_data.append(country['total']['heal'])
             country_data.append(country['total']['dead'])
 
-            if country['name'] == '中国':
-                country_data.append(china_yesterday['confirm'])
-                country_data.append(china_yesterday['suspect'])
-                country_data.append(china_yesterday['heal'])
-                country_data.append(china_yesterday['dead'])
+            # if country['name'] == '中国':
+            #     country_data.append(china_yesterday['confirm'])
+            #     country_data.append(china_yesterday['suspect'])
+            #     country_data.append(china_yesterday['heal'])
+            #     country_data.append(china_yesterday['dead'])
 
                
             # print(country_data)
@@ -165,8 +167,26 @@ class COVID_19():
         self.write_csv(dict_city, first_row, filename)
         return dict_city
 
-    def get_chinaHistory_data(self,items):
-        chinaDailyHistory_data = items['chinaDayList']
+    def get_chinaHistory_data(self):
+        """获取中国历史疫情数据"""
+
+        page = requests.get('https://view.inews.qq.com/g2/getOnsInfo?name=disease_other', headers=self.headers)
+        page.encoding = 'UTF-8'
+
+        # 将所有数据格式化为json数据
+        formatted_data = json.loads(page.text)
+
+        # 将所有疫情数据载入
+        all_data = json.loads(formatted_data['data'])
+        filename = self.csv_path + 'json_response2.txt'
+        with open(filename, 'a', newline='') as temp:
+            temp.write(json.dumps(all_data))
+        temp.close()
+
+
+
+
+        chinaDailyHistory_data = all_data['chinaDayList']
         dict_history = OrderedDict()
         # print(len(province_yesterday))
         for history in chinaDailyHistory_data:
@@ -208,6 +228,9 @@ if __name__ == '__main__':
     global_data = COVID19_data.get_global_data(page_data)
     province_data = COVID19_data.get_province_data(page_data)
     city_data = COVID19_data.get_city_data(page_data)
-    history = COVID19_data.get_chinaHistory_data(page_data)
+    history = COVID19_data.get_chinaHistory_data()
     # print(page_data)
 
+# https://view.inews.qq.com/g2/getOnsInfo?name=disease_other&callback=jQuery341011927797283914199_1583812478231&_=1583812478232
+#
+# Referer: https://news.qq.com/zt2020/page/feiyan.htm
