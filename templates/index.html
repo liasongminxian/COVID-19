@@ -33,17 +33,23 @@
         )
     </script>
 
-    <div id="ConfNewLine" style="width:1024px; height:600px;"></div>
+    <div id="app2">
+        <el-tabs  v-model="activeName" type="border-card" @tab-click="handleClick">
+      <el-tab-pane name="first" label="全国累计">
+          <div id="first" style="width:1024px; height:600px;">
+    </div></el-tab-pane>
+      <el-tab-pane name="second" label="全国现有"><div id="second" style="width:1024px; height:600px;">
+    </div></el-tab-pane>
+      <el-tab-pane name="third" label="全国新增"><div id="third" style="width:1024px; height:600px;">
+    </div></el-tab-pane>
+{#      <el-tab-pane name="fourth" label="定时任务补偿"><div id="fourth" style="width:1024px; height:600px;">#}
+{#    </div></el-tab-pane>#}
+    </el-tabs>
+
+
+    </div>
     <script>
-        $(
-            function () {
-                var chart = echarts.init(document.getElementById('ConfNewLine'), 'white', {renderer: 'canvas'});
-                $.ajax({
-                    type: "GET",
-                    url: "http://127.0.0.1:5000/confChart",
-                    dataType: 'json',
-                    success: function (result) {
-                        var day_options = {
+        var day_options = {
            
                             tooltip: {
                                 trigger: 'axis'
@@ -53,27 +59,81 @@
                                 show: true,
                                 feature: {
                                     dataZoom: {
-                                        yAxisIndex: 'none'
+                                        yAxisIndex: 'none',
+                                        show: false
                                     }, //区域缩放，区域缩放还原
                                     dataView: { 
                                         readOnly: false
                                     }, //数据视图
                                     magicType: {
-                                        type: ['line', 'bar', 'stack', 'tiled']
+                                        type: ['line', 'bar']
                                     },  //切换为折线图，切换为柱状图
                                     restore: {},  //还原
                                     saveAsImage: {}   //保存为图片
                                 }
-                            },result
+                            }
 
-                        };
-                        chart.setOption(day_options);
+                        }
+        $(
+            function () {
+                var chart = echarts.init(document.getElementById('first'), 'white', {renderer: 'canvas'});
+                var data_label = {
+                    name: JSON.stringify("null"),
+                    label: JSON.stringify("全国累计")
+                };
+                $.ajax({
+                    type: "GET",
+                    url: "http://127.0.0.1:5000/confChart",
+                    data: data_label,
+                    dataType: 'json',
+                    success: function (result) {
                         chart.setOption(result);
+                        chart.setOption(day_options);
+
                     }
                 });
+
             }
         )
+
+        var Main = {
+            data() {
+              return {
+                activeName: 'first'
+              };
+            },
+            methods: {
+              handleClick(tab, event) {
+                var chart2 = echarts.init(document.getElementById(tab.name), 'white', {renderer: 'canvas'});
+                console.log(tab.name, event);
+                var data_label = {
+                    name: JSON.stringify(tab.name),
+                    label: JSON.stringify(tab.label)
+                };
+                $.ajax({
+                    type: "GET",
+                    url: "http://127.0.0.1:5000/confChart",
+                    data: data_label,
+                    dataType: 'json',
+                    success: function (result) {
+
+                        chart2.setOption(result);
+                        chart2.setOption(day_options);
+
+                    }
+                });
+              }
+            }
+          };
+        var Ctor = Vue.extend(Main)
+        new Ctor().$mount('#app2')
+
+
+        {#new Vue().$mount('#app2')#}
+
+
     </script>
+
 
 
       <div id="app">
@@ -168,8 +228,6 @@
         },
         methods: {
           load(tree, treeNode, resolve) {
-              console.log(tree.id);
-              var tree_id = tree.id;
             setTimeout(() => {
               resolve([{
                   id: 32,

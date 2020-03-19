@@ -187,6 +187,7 @@ class COVID_19():
 
 
         chinaDailyHistory_data = all_data['chinaDayList']
+        chinaDayAddList_data = all_data['chinaDayAddList']
         dict_history = OrderedDict()
         # print(len(province_yesterday))
         for history in chinaDailyHistory_data:
@@ -196,16 +197,28 @@ class COVID_19():
             history_data.append(history['suspect'])
             history_data.append(history['heal'])
             history_data.append(history['dead'])
+            history_data.append(history['nowConfirm'])
+            history_data.append(history['nowSevere'])
+
+            for add_data in chinaDayAddList_data:
+                if add_data['date'] == history['date']:
+                    history_data.append(add_data['confirm'])
+                    history_data.append(add_data['suspect'])
+                    break
             dict_history[history_data[0]] = history_data
 
         print(dict_history)
 
         filename = self.csv_path + '中国疫情历史数据.csv'
         first_row = ['日期',
-                     '累计确诊病例',
-                     '疑似病例',
-                     '累计治愈病例',
-                     '累计死亡病例'
+                     '累计确诊',
+                     '现有疑似',
+                     '累计治愈',
+                     '累计死亡',
+                     '现有确诊',
+                     '现有重症',
+                     '新增确诊',
+                     '新增疑似'
                      ]
         self.write_csv(dict_history, first_row, filename)
         return dict_history

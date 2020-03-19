@@ -1,6 +1,6 @@
 from flask import Flask, render_template,request
 from pyecharts import options as opts
-from pyecharts.charts import Map,Line
+from pyecharts.charts import Map,Line,Pie,Grid
 from pyecharts.globals import ThemeType
 
 
@@ -45,44 +45,86 @@ def map_base()->Map:
 # 02. 疫情新增趋势图
 def conf_new_base() -> Line:
     """全国疫情累计/现有疑似"""
-    # 静态数据
+    name = json.loads(request.args.get('name'))
+    label = json.loads(request.args.get('label'))
+    items = []
+    y = []
+    i = 0
 
-    dataY1 = [59, 77, 149, 131, 256, 444, 688, 769, 1771, 1459, 1737, 1982, 2102, 2590, 2829, 3235, 3887]
-    dataY2 = [59, 27, 149, 131, 680,1118,1309, 3806, 2077, 3248, 4148, 4812, 5019, 4562, 5173, 5072, 3971]
-    dataX = ['2020.01.18', '2020.01.19', '2020.01.20', '2020.01.21', '2020.01.22','2020.01.23','2020.01.24','2020.01.25',
-             '2020.01.26', '2020.01.27', '2020.01.28', '2020.01.29', '2020.01.30','2020.01.31','2020.02.01','2020.02.02',
-             '2020.02.03', '2020.02.04']
+    if (name == 'null') or (name =='first'):
+        items = ['累计确诊','累计治愈','累计死亡']
+
+    if name == "second":
+        items = ['现有疑似', '现有确诊', '现有重症']
+
+    if name == "third":
+        items = ['新增确诊', '新增疑似']
+
+
     file = '中国疫情历史数据.csv'
     data = get_data(file)
-    dict_suspect = data.set_index('日期')['疑似病例'].to_dict()
-    dict_comfirm = data.set_index('日期')['累计确诊病例'].to_dict()
-    comfirm_list = list(dict_comfirm.values())
-    suspect_list = list(dict_suspect.values())
-    date_list = list(dict_comfirm.keys())
+    for item in items:
+        dict_str = data.set_index('日期')[item].to_dict()
+        y.append(list(dict_str.values()))
+        if i == 0:
+            date_list = list(dict_str.keys())
+            i = 1
 
     date_list = [city.strip("'") for city in date_list]
+    print(items)
 
-
-    print(suspect_list)
-    print(comfirm_list)
-    print(date_list)
-
-
-    c = (
-        Line(init_opts=opts.InitOpts(theme=ThemeType.LIGHT))
-        .add_xaxis(date_list)
-        .add_yaxis("累计确诊", comfirm_list, is_smooth=True)
-        .add_yaxis("现有疑似", suspect_list, is_smooth=True)
-        .set_global_opts(
-            title_opts=opts.TitleOpts(title="全国疫情累计确诊/疑似趋势图"),
-            yaxis_opts=opts.AxisOpts(
-                type_="value",
-                axistick_opts=opts.AxisTickOpts(is_show=True),
-                splitline_opts=opts.SplitLineOpts(is_show=True),
-            ),
-            xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
+    if len(items) == 2:
+        c = (
+            Line(init_opts=opts.InitOpts())
+                .add_xaxis(date_list)
+                .add_yaxis(items[0], y[0], is_smooth=True)
+                .add_yaxis(items[1], y[1], is_smooth=True)
+                .set_global_opts(
+                title_opts=opts.TitleOpts(title=label+"疫情趋势图"),
+                yaxis_opts=opts.AxisOpts(
+                    type_="value",
+                    axistick_opts=opts.AxisTickOpts(is_show=True),
+                    splitline_opts=opts.SplitLineOpts(is_show=True),
+                ),
+                xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
+            )
+                .set_series_opts(
+                markpoint_opts=opts.MarkPointOpts(
+                    data=[
+                        opts.MarkPointItem(type_="max", name="最大值"),
+                        opts.MarkPointItem(type_="min", name="最小值"),
+                    ]
+                ),
+                itemstyle_opts={"normal": {"label": {"show": False}}}
+            )
         )
-    )
+
+    else:
+        c = (
+            Line(init_opts=opts.InitOpts())
+            .add_xaxis(date_list)
+            .add_yaxis(items[0], y[0], is_smooth=True)
+            .add_yaxis(items[2], y[2], is_smooth=True)
+            .add_yaxis(items[1], y[1], is_smooth=True)
+            .set_global_opts(
+                title_opts=opts.TitleOpts(title=label+"疫情趋势图"),
+                yaxis_opts=opts.AxisOpts(
+                    type_="value",
+                    axistick_opts=opts.AxisTickOpts(is_show=True),
+                    splitline_opts=opts.SplitLineOpts(is_show=True),
+                ),
+                xaxis_opts=opts.AxisOpts(type_="category", boundary_gap=False),
+            )
+            .set_series_opts(
+                markpoint_opts=opts.MarkPointOpts(
+                data=[
+                    opts.MarkPointItem(type_="max", name="最大值"),
+                    opts.MarkPointItem(type_="min", name="最小值"),
+                ]
+                ),
+                itemstyle_opts={ "normal": {"label" : {"show": False}}}
+            )
+        )
     return c
 
 
