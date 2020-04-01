@@ -1,7 +1,7 @@
 from flask import Flask, render_template,request
 from pyecharts import options as opts
 from pyecharts.charts import Map,Line,Pie,Grid
-from pyecharts.globals import ThemeType
+from data_COVID import COVID_19
 
 
 from pyecharts.components import Table
@@ -43,7 +43,7 @@ def map_base()->Map:
     return c
 
 # 02. 疫情新增趋势图
-def conf_new_base() -> Line:
+def conf_new_base() ->Line:
     """全国疫情累计/现有疑似"""
     name = json.loads(request.args.get('name'))
     label = json.loads(request.args.get('label'))
@@ -52,7 +52,7 @@ def conf_new_base() -> Line:
     i = 0
 
     if (name == 'null') or (name =='first'):
-        items = ['累计确诊','累计治愈','累计死亡']
+        items = ['累计确诊','累计死亡','累计治愈']
 
     if name == "second":
         items = ['现有疑似', '现有确诊', '现有重症']
@@ -74,7 +74,7 @@ def conf_new_base() -> Line:
     print(items)
 
     if len(items) == 2:
-        c = (
+        line = (
             Line(init_opts=opts.InitOpts())
                 .add_xaxis(date_list)
                 .add_yaxis(items[0], y[0], is_smooth=True)
@@ -100,12 +100,12 @@ def conf_new_base() -> Line:
         )
 
     else:
-        c = (
+        line = (
             Line(init_opts=opts.InitOpts())
             .add_xaxis(date_list)
             .add_yaxis(items[0], y[0], is_smooth=True)
-            .add_yaxis(items[2], y[2], is_smooth=True)
             .add_yaxis(items[1], y[1], is_smooth=True)
+            .add_yaxis(items[2], y[2], is_smooth=True)
             .set_global_opts(
                 title_opts=opts.TitleOpts(title=label+"疫情趋势图"),
                 yaxis_opts=opts.AxisOpts(
@@ -125,7 +125,9 @@ def conf_new_base() -> Line:
                 itemstyle_opts={ "normal": {"label" : {"show": False}}}
             )
         )
-    return c
+ 
+
+    return line
 
 
 
@@ -161,6 +163,7 @@ def get_data(path):
 # 第二部分：路由配置
 @app.route("/")
 def index():
+    COVID_19().collect_data_main()
     province = table_province()
     city = table_city()
     return render_template("index.html", province=province,city = city)

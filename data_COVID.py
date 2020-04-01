@@ -233,15 +233,17 @@ class COVID_19():
                 file.writerow(items[name])
         temp.close()
 
+    def collect_data_main(self):
+        page_data = self.get_page_data()
+        self.get_global_data(page_data)
+        self.get_province_data(page_data)
+        self.get_city_data(page_data)
+        self.get_chinaHistory_data()
 
 
 if __name__ == '__main__':
-    COVID19_data = COVID_19()
-    page_data = COVID19_data.get_page_data()
-    global_data = COVID19_data.get_global_data(page_data)
-    province_data = COVID19_data.get_province_data(page_data)
-    city_data = COVID19_data.get_city_data(page_data)
-    history = COVID19_data.get_chinaHistory_data()
+    covid_19 = COVID_19()
+    covid_19.collect_data_main()
     # print(page_data)
 
 # https://view.inews.qq.com/g2/getOnsInfo?name=disease_other&callback=jQuery341011927797283914199_1583812478231&_=1583812478232
